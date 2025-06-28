@@ -82,8 +82,23 @@ def alterar(request):
         return HttpResponse("Faça o login para acessar!")
 
 def visualizar(request):
-    if request.user.is_authenticated:
-        return render(request, 'usuarios/visualizar.html')
+    if request.method == "GET":
+        if request.user.is_authenticated:
+            lista_notas = Nota.objects.all()
+            dicionario_notas = {'lista_notas':lista_notas}
+            return render(request, 'usuarios/visualizar.html', dicionario_notas)
+        else:
+            return HttpResponse("Faça o login para acessar!") 
     else:
-        return HttpResponse("Faça o login para acessar!")
+        disciplina = request.POST.get('disciplina') 
+        if disciplina == "Todas as disciplinas":
+            lista_notas = Nota.objects.all()
+            dicionario_notas = {'lista_notas':lista_notas}
+            return render(request, 'usuarios/visualizar.html', dicionario_notas)
+        else:
+            lista_notas = Nota.objects.filter(disciplina=disciplina)
+            dicionario_notas_filtradas = {'lista_notas':lista_notas}
+            return render(request, 'usuarios/visualizar.html', dicionario_notas_filtradas)
+        
+             
 
