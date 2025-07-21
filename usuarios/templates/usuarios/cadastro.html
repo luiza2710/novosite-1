@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href = "{% static 'css/bootstrap.min.css' %}" rel = "stylesheet">
-    <title>Cadastro de usuários</title>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <title>Cadastro de Evento Cultural</title>
 </head>
 <body>
     <div class="container">
@@ -13,32 +13,41 @@
           <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
             <div class="card border-0 shadow rounded-3 my-5">
               <div class="card-body p-4 p-sm-5">
-                <h5 class="card-title text-center mb-5 fw-light fs-5">Cadastro de usuários</h5>
-                <form action = "{% url 'cadastro' %}" method = "POST">
+                <h5 class="card-title text-center mb-5 fw-light fs-5">Cadastro de Evento Cultural</h5>
+                <form action="{% url 'cadastrar_evento' %}" method="POST">
                     {% csrf_token %}
+                    
                     <div class="form-floating mb-3">
-                        <input type="TEXT" class="form-control" id="floatingInput" placeholder="Name" name = "nome">
-                        <label for="floatingInput">Nome completo</label>
-                      </div>
-                  <div class="form-floating mb-3">
-                    <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com" name = "email">
-                    <label for="floatingInput">E-mail</label>
-                  </div>
-                  <div class="form-floating mb-3">
-                    <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name = "senha">
-                    <label for="floatingPassword">Senha</label>
-                  </div>
-    
-                  <div class="d-grid">
-                    <button class="btn btn-primary btn-login text-uppercase fw-bold" type="submit">Cadastrar</button>
-                  </div>
-                  <hr class="my-4">
+                        <input type="text" class="form-control" id="tituloEvento" placeholder="Título" name="titulo">
+                        <label for="tituloEvento">Título do Evento</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input type="date" class="form-control" id="dataEvento" name="data">
+                        <label for="dataEvento">Data do Evento</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="localEvento" placeholder="Local" name="local">
+                        <label for="localEvento">Local</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <textarea class="form-control" id="descricaoEvento" placeholder="Descrição" name="descricao" style="height: 100px"></textarea>
+                        <label for="descricaoEvento">Descrição</label>
+                    </div>
+
+                    <div class="d-grid">
+                        <button class="btn btn-primary btn-login text-uppercase fw-bold" type="submit">Cadastrar</button>
+                    </div>
+
+                    <hr class="my-4">
                   
                 </form>
               </div>
             </div>
           </div>
         </div>
-      </div>   
+    </div>   
 </body>
 </html>

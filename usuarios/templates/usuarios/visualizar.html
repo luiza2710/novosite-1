@@ -1,48 +1,45 @@
 {% extends 'usuarios/base.html' %}
 
-{% block aba %}Visualizar Notas{% endblock %}
+{% block aba %}Visualizar Evento{% endblock %}
 
-{% block titulo %}Visualizar Notas{% endblock %}
+{% block titulo %}Visualizar Evento{% endblock %}
 
 {% block conteudo %}
-<h3>Visualização de notas registradas</h3>
+<h3>Visualização de Eventos Culturais</h3>
 <hr>
-<form action = "{% url 'visualizar' %}" method = "POST">
+
+<form action="{% url 'visualizar_eventos' %}" method="POST">
     {% csrf_token %}
-    <div class = "filter">
-        <label for = "disciplinaName">Filtrar por disciplina:</label>
-        <select name = "disciplina">
-            <option>Todas as disciplinas</option>
-            {% for campo in lista_notas %}
-                <option>{{ campo.disciplina }}</option>
+    <div class="filter">
+        <label for="filtroLocal">Filtrar por local:</label>
+        <select name="local">
+            <option>Todos os locais</option>
+            {% for evento in lista_eventos %}
+                <option>{{ evento.local }}</option>
             {% endfor %}
         </select>
-        <button type = "submit" class = "btn btn-primary">Filtrar</button>
+        <button type="submit" class="btn btn-primary">Filtrar</button>
     </div>
 </form>
 
-<div class = "table-responsive">
-    <table class = "table table-striped">
+<div class="table-responsive mt-3">
+    <table class="table table-striped">
         <tr>
-            <th>Aluno</th>
-            <th>Disciplina</th>
-            <th>Nota das Atividades</th>
-            <th>Nota do Trabalho</th>
-            <th>Nota da prova</th>
-            <th>Média</th>
+            <th>Título</th>
+            <th>Data</th>
+            <th>Local</th>
+            <th>Descrição</th>
         </tr>
-        {% for campo in lista_notas %}
+        {% for evento in lista_eventos %}
             <tr>
-                <td>{{ user.first_name }}</td>
-                <td>{{ campo.disciplina }}</td>
-                <td>{{ campo.nota_atividades }}</td>
-                <td>{{ campo.nota_trabalho }}</td>
-                <td>{{ campo.nota_prova }}</td>
-                <td>{{ campo.media }}</td>
+                <td>{{ evento.titulo }}</td>
+                <td>{{ evento.data }}</td>
+                <td>{{ evento.local }}</td>
+                <td>{{ evento.descricao }}</td>
             </tr>
         {% empty %}
             <tr>
-                <td colspan = "6">Nenhum registro encontrado.</td>
+                <td colspan="4">Nenhum evento encontrado.</td>
             </tr>
         {% endfor %}
     </table>

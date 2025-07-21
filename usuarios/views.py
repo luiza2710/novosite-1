@@ -1,19 +1,18 @@
-from django.shortcuts import render
-from django.http.response import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
-from django.contrib.auth import login as login_django, logout as logout_django
-from .models import Nota
+from django.contrib.auth import authenticate, login as login_django, logout as logout_django
+from .models import Evento
 
+# LOGIN
 def login(request):
     if request.method == "GET":
         return render(request, 'usuarios/login.html')
     else:
         username = request.POST.get('email')
         senha = request.POST.get('senha')
-
-        user = authenticate(username = username, password = senha)
+        user = authenticate(username=username, password=senha)
 
         if user:
             login_django(request, user)
@@ -21,13 +20,14 @@ def login(request):
         else:
             return HttpResponse('E-mail ou senha inválidos!')
 
+# LOGOUT
 def logout(request):
     if request.user.is_authenticated:
         logout_django(request)
         return render(request, 'usuarios/login.html')
-    else:
-        return HttpResponse("Você não acessou sua conta ainda!")
+    return HttpResponse("Você não acessou sua conta ainda!")
 
+# CADASTRO DE USUÁRIO
 def cadastro(request):
     if request.method == "GET":
         return render(request, 'usuarios/cadastro.html')
@@ -37,89 +37,84 @@ def cadastro(request):
         password = request.POST.get('senha')
         first_name = request.POST.get('nome')
 
-        user = User.objects.filter(username=username).first()
-
-        if user:
+        if User.objects.filter(username=username).exists():
             return HttpResponse("Usuário já existente!")
         else:
-            user = User.objects.create_user(username=username, email=email, password=password, first_name=first_name)
-            user.save()
-
+            User.objects.create_user(username=username, email=email, password=password, first_name=first_name)
             return render(request, 'usuarios/login.html')
-        
+
+# HOME
 def home(request):
     if request.user.is_authenticated:
         return render(request, 'usuarios/home.html')
-    else:
-        return HttpResponse("Faça o login para acessar!")
+    return HttpResponse("Faça o login para acessar!")
 
-def lancar(request):
+
+def cadastrar_evento(request):
     if request.method == "GET":
-        if request.user.is_authenticated:
-            return render(request, 'usuarios/lancar.html')
-        else:
-            return HttpResponse("Faça o login para acessar!")
+        return render(request, 'usuarios/cadastro_evento.html')
     else:
-        nota = Nota()
-        nota.nome_aluno = request.user.first_name
-        nota.disciplina = request.POST.get('disciplina')
-        nota.nota_atividades = request.POST.get('nota_atividades')
-        nota.nota_trabalho = request.POST.get('nota_trabalho')
-        nota.nota_prova = request.POST.get('nota_prova')
-        nota.media = int(nota.nota_atividades) + int(nota.nota_trabalho) + int(nota.nota_prova)
+        titulo = request.POST.get('titulo')
+        data = request.POST.get('data')
+        local = request.POST.get('local')
+        descricao = request.POST.get('descricao')
 
-        nota_verificada = Nota.objects.filter(disciplina=nota.disciplina).first()
-
-        if nota_verificada:
-            return HttpResponse("Disciplina já possui notas cadastradas!")
+        if Evento.objects.filter(titulo=titulo, data=data).exists():
+            return HttpResponse("Este evento já foi cadastrado!")
         else:
-            nota.save()
+            Evento.objects.create(titulo=titulo, data=data, local=local, descricao=descricao)
             return render(request, 'usuarios/home.html')
 
-def alterar(request):
-    if request.method == "GET":
-        if request.user.is_authenticated:
-            lista_notas = Nota.objects.all()
-            dicionario_notas = {'lista_notas':lista_notas}
-            return render(request, 'usuarios/alterar.html', dicionario_notas)
-        else:
-            return HttpResponse("Faça o login para acessar!")
 
-def visualizar(request):
+def visualizar_eventos(request):
     if request.method == "GET":
-        if request.user.is_authenticated:
-            lista_notas = Nota.objects.all()
-            dicionario_notas = {'lista_notas':lista_notas}
-            return render(request, 'usuarios/visualizar.html', dicionario_notas)
-        else:
-            return HttpResponse("Faça o login para acessar!") 
+        eventos = Evento.objects.all()
     else:
-        disciplina = request.POST.get('disciplina') 
-        if disciplina == "Todas as disciplinas":
-            lista_notas = Nota.objects.all()
-            dicionario_notas = {'lista_notas':lista_notas}
-            return render(request, 'usuarios/visualizar.html', dicionario_notas)
+        local = request.POST.get('local')
+        if local == "Todos os locais":
+            eventos = Evento.objects.all()
         else:
-            lista_notas = Nota.objects.filter(disciplina=disciplina)
-            dicionario_notas_filtradas = {'lista_notas':lista_notas}
-            return render(request, 'usuarios/visualizar.html', dicionario_notas_filtradas)
-        
-def excluir_verificacao(request, pk):
-    if request.method == "GET":
-        if request.user.is_authenticated:
-            lista_notas = Nota.objects.get(pk=pk) 
-            dicionario_notas = {'lista_notas':lista_notas}     
-            return render(request, 'usuarios/excluir.html', dicionario_notas) 
-        else:
-            return HttpResponse("Faça o login para acessar!")      
+            eventos = Evento.objects.filter(local=local)
+    return render(request, 'usuarios/visualizar_eventos.html', {'lista_eventos': eventos})
 
-def excluir(request, pk):
-    if request.method == "GET":
-        if request.user.is_authenticated:
-            disciplina_selecionada = Nota.objects.get(pk=pk)
-            disciplina_selecionada.delete()
-            return HttpResponseRedirect(reverse('alterar'))
-        else:
-            return HttpResponse("Faça o login para acessar!")
 
+def alterar_evento(request):
+    if request.user.is_authenticated:
+        eventos = Evento.objects.all()
+        return render(request, 'usuarios/alterar_evento.html', {'lista_eventos': eventos})
+    return HttpResponse("Faça o login para acessar!")
+
+
+def excluir_evento_confirmar(request, pk):
+    if request.user.is_authenticated:
+        evento = get_object_or_404(Evento, pk=pk)
+        return render(request, 'usuarios/excluir_evento.html', {'evento': evento})
+    return HttpResponse("Faça o login para acessar!")
+
+
+def excluir_evento(request, pk):
+    if request.user.is_authenticated:
+        evento = get_object_or_404(Evento, pk=pk)
+        evento.delete()
+        return redirect('alterar_evento')
+    return HttpResponse("Faça o login para acessar!")
+
+
+def editar_evento_confirmar(request, pk):
+    if request.user.is_authenticated:
+        evento = get_object_or_404(Evento, pk=pk)
+        return render(request, 'usuarios/editar_evento.html', {'evento': evento})
+    return HttpResponse("Faça o login para acessar!")
+
+
+def editar_evento(request, pk):
+    if request.user.is_authenticated and request.method == "POST":
+        titulo = request.POST.get('titulo')
+        data = request.POST.get('data')
+        local = request.POST.get('local')
+        descricao = request.POST.get('descricao')
+
+        Evento.objects.filter(pk=pk).update(titulo=titulo, data=data, local=local, descricao=descricao)
+        return redirect('alterar_evento')
+    return HttpResponse("Faça o login para acessar!")
         
